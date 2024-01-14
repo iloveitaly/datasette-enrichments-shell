@@ -1,0 +1,36 @@
+[tool.poetry]
+name = "datasette-enrichments-shell"
+version = "0.1"
+description = "Enrich data using regular expressions"
+readme = "README.md"
+authors = ["Michael Bianco <mike@mikebian.co>"]
+license = "MIT"
+classifiers = [
+    "Framework :: Datasette",
+    "License :: OSI Approved :: Apache Software License",
+]
+packages = [{ include = "datasette_enrichments_shell" }]
+
+
+[tool.poetry.urls]
+Homepage = "https://github.com/iloveitaly/datasette-enrichments-shell"
+Changelog = "https://github.com/iloveitaly/datasette-enrichments-shell/releases"
+Issues = "https://github.com/iloveitaly/datasette-enrichments-shell/issues"
+CI = "https://github.com/iloveitaly/datasette-enrichments-shell/actions"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+datasette = "*"
+datasette-enrichments = "^0.2"
+sqlite-utils = "^3.36"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.plugins."datasette"]
+# enrichments_shell = "datasette_enrichments_shell:main"
+enrichments_shell = "datasette_enrichments_shell"
+
+[tool.pytest.ini_options]
+asyncio_mode = "strict"
