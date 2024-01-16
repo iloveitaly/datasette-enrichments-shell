@@ -32,5 +32,8 @@ build-backend = "poetry.core.masonry.api"
 # enrichments_shell = "datasette_enrichments_shell:main"
 enrichments_shell = "datasette_enrichments_shell"
 
+[tool.poetry.scripts]
+enrichments-shell = "datasette_enrichments_shell:main"
+
 [tool.pytest.ini_options]
 asyncio_mode = "strict"
