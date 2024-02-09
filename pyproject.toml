@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "datasette-enrichments-shell"
 version = "0.1"
-description = "Enrich data using regular expressions"
+description = "Enrich data using datasette and arbitrary commands on your local"
 readme = "README.md"
 authors = ["Michael Bianco <mike@mikebian.co>"]
 license = "MIT"
