@@ -41,7 +41,7 @@ class ShellEnrichment(Enrichment):
             command = TextAreaField(
                 "Command",
                 render_kw={
-                    "placeholder": "Use (?P<name>pattern) for named capture groups"
+                    "placeholder": f"/path/to/shell\njq -r '.email | xargs -I{{}} echo {{}}'"
                 },
                 validators=[DataRequired(message="A regular expression is required.")],
             )
@@ -76,7 +76,14 @@ class ShellEnrichment(Enrichment):
         if not pks:
             pks = ["rowid"]
 
-        to_update = []
+        # does the output column exist?
+        if output_column not in await db.table_columns(table):
+            print("Adding output column")
+            await db.execute_write(
+                "alter table [{table}] add column [{output_column}] text".format(
+                    table=table, output_column=output_column
+                )
+            )
 
         for row in rows:
             # let's check if there's already content in the output column
@@ -106,21 +113,34 @@ class ShellEnrichment(Enrichment):
             if not is_successful:
                 # TODO better way to display errors?
                 print(stderr.decode("utf-8"))
+
+                # TODO this method sig doesn't like up with available arguments
+                # await self.log_error(
+                #     db,
+                #     table,
+                #     row,
+                #     f"Command exited with error code {process.returncode}",
+                # )
+
                 continue
 
             output = stdout.decode("utf-8")
-            # ids is an array of keys to properly handle compound pks
-            ids = [row[pk] for pk in pks]
-            to_update.append((ids, {output_column: output}))
 
-        if to_update:
+            if not output:
+                print("output is empty")
+                continue
 
-            def fn(conn):
-                db = sqlite_utils.Database(conn)
-                for ids, values in to_update:
-                    db[table].update(ids, values, alter=True)
+            print(f"Updating row {row[pks[0]]} with output {output}")
 
-            await db.execute_write_fn(fn, block=True)
+            await db.execute_write(
+                "update [{table}] set [{output_column}] = ? where {wheres}".format(
+                    table=table,
+                    output_column=output_column,
+                    wheres=" and ".join('"{}" = ?'.format(pk) for pk in pks),
+                ),
+                # ids is an array of keys to properly handle compound pks
+                [output] + list(row[pk] for pk in pks),
+            )
 
     def _prepare_input(self, *, row, input_mode, single_column, database, table):
         if input_mode == "json":
