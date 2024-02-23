@@ -1,7 +1,8 @@
 [tool.poetry]
 name = "datasette-enrichments-shell"
 version = "0.1"
-description = "Enrich data using datasette and arbitrary commands on your local"
+description = "Enrich data using datasette and arbitrary commands on your local machine"
+keywords = ["datasette", "datasette-enrichments", "shell", "sqlite"]
 readme = "README.md"
 authors = ["Michael Bianco <mike@mikebian.co>"]
 license = "MIT"
