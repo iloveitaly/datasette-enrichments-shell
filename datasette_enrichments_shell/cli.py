@@ -24,11 +24,13 @@ def create_click_command(form_class):
 
         option = click.option(
             f"--{field_name.replace('_', '-')}",
-            type=click.Choice(
-                [c[0] for c in field.kwargs["choices"]], case_sensitive=False
-            )
-            if isinstance(field.field_class, SelectField)
-            else str,
+            type=(
+                click.Choice(
+                    [c[0] for c in field.kwargs["choices"]], case_sensitive=False
+                )
+                if isinstance(field.field_class, SelectField)
+                else str
+            ),
             required=any(
                 isinstance(v, DataRequired) for v in field.kwargs.get("validators", [])
             ),
@@ -48,14 +50,10 @@ def dynamic_command_func(**form_data):
     breakpoint()
 
 
-from ipdb import iex
-
-
 # TODO if --help is passed
 @click.command()
 @click.argument("database-path", type=click.Path(exists=True))
 @click.argument("table-name", type=str, required=False)
-@iex
 def cli(database_path, table_name, **kwargs):
     if not table_name:
         db = sqlite_utils.Database(database_path)
