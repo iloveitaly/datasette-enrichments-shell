@@ -1,10 +1,11 @@
-#  (2024-02-23)
+# 0.2.0 (2024-02-23)
 
 
 ### Bug Fixes
 
 * poetry lock file ([4ce898e](https://github.com/iloveitaly/datasette-enrichments-shell/commit/4ce898ebf62ee04a1685e4a86babe9aa39bc8b26))
 * remove bad debugging reference ([1da53b7](https://github.com/iloveitaly/datasette-enrichments-shell/commit/1da53b7059ef1e0d38263003e3bda5127133606e))
+* version ([74a3551](https://github.com/iloveitaly/datasette-enrichments-shell/commit/74a35518e794b0b189decd87e57e0a877052a658))
 
 
 ### Features
