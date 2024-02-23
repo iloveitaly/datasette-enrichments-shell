@@ -19,7 +19,7 @@ Issues = "https://github.com/iloveitaly/datasette-enrichments-shell/issues"
 CI = "https://github.com/iloveitaly/datasette-enrichments-shell/actions"
 
 [tool.poetry.dependencies]
-python = "^3.10"
+python = "^3.8"
 datasette = "*"
 datasette-enrichments = "^0.2"
 sqlite-utils = "^3.36"
