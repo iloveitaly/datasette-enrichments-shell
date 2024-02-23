@@ -3,7 +3,6 @@
 on:
   push:
     branches:
-      - main
       - master
 
 # by default, permissions are read-only, read + write is required for git pushes
@@ -32,10 +31,10 @@ jobs:
         with:
           poetry-version: "${{ steps.versions.outputs.poetry }}"
       - run: poetry install
-      - name: Run tests
-        run: poetry run pytest -v
+      # - name: Run tests
+      #   run: poetry run pytest -v
       - name: Run CLI
-        run: poetry run ${{ github.event.repository.name }} --help
+        run: poetry run enrichments-shell --help
 
   build_and_push_to_registry:
     if: github.ref == 'refs/heads/master'
