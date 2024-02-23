@@ -1,0 +1,106 @@
+# https://raw.githubusercontent.com/embedez/ez-cdn/697dbc6dc1496d27b96c57994130f43da7477300/.github/workflows/build.yml
+
+on:
+  push:
+    branches:
+      - main
+      - master
+
+# by default, permissions are read-only, read + write is required for git pushes
+permissions:
+  contents: write
+
+env:
+  PIP_DEFAULT_TIMEOUT: 60
+  PIP_RETRIES: 5
+
+jobs:
+  matrix-test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.12", "3.11", "3.10", "3.9", "3.8"]
+    steps:
+      - uses: actions/checkout@v4
+      - name: ASDF Parse
+        uses: kota65535/github-asdf-parse-action@v1.1.0
+        id: versions
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "${{ matrix.python-version }}"
+      - uses: abatilo/actions-poetry@v3.0.0
+        with:
+          poetry-version: "${{ steps.versions.outputs.poetry }}"
+      - run: poetry install
+      - name: Run tests
+        run: poetry run pytest -v
+      - name: Run CLI
+        run: poetry run ${{ github.event.repository.name }} --help
+
+  build_and_push_to_registry:
+    if: github.ref == 'refs/heads/master'
+    needs: matrix-test
+    name: Docker Build and Push
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Sync Repository Metadata
+        # uses: kbrashears5/github-action-repo-sync@v1.0.0
+        uses: iloveitaly/github-action-repo-sync@python
+        with:
+          # gh secret set GH_PERSONAL_TOKEN --app actions --body $GH_PERSONAL_TOKEN
+          TOKEN: ${{ secrets.GH_PERSONAL_TOKEN }}
+
+      - name: ASDF Parse
+        uses: kota65535/github-asdf-parse-action@v1.1.0
+        id: versions
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "${{ steps.versions.outputs.python }}"
+
+      - name: Install Poetry
+        uses: abatilo/actions-poetry@v3
+        with:
+          poetry-version: "${{ steps.versions.outputs.poetry }}"
+
+      - name: Install dependencies
+        run: |
+          poetry install
+
+      - name: Poetry Check
+        run: |
+          poetry check --lock
+
+      - name: Conventional Changelog Action
+        id: changelog
+        uses: TriPSs/conventional-changelog-action@v5
+        with:
+          github-token: ${{ secrets.github_token }}
+          version-file: "./pyproject.toml"
+          version-path: "tool.poetry.version"
+          fallback-version: "0.1.0"
+          output-file: "CHANGELOG.md"
+
+      # NOTE must run after versioning otherwise the right version won't be pushed
+      - name: Build distribution package
+        if: ${{ steps.changelog.outputs.skipped == 'false' }}
+        run: |
+          poetry build
+
+      - name: Publish to PyPI
+        if: ${{ steps.changelog.outputs.skipped == 'false' }}
+        run: |
+          # `gh secret set PYPI_API_TOKEN --app actions --body $PYPI_API_TOKEN`
+          poetry publish -u __token__ -p ${{ secrets.PYPI_API_TOKEN }}
+
+      - name: Github Release
+        if: ${{ steps.changelog.outputs.skipped == 'false' }}
+        uses: softprops/action-gh-release@v1
+        with:
+          # output options: https://github.com/TriPSs/conventional-changelog-action#outputs
+          body: ${{ steps.changelog.outputs.clean_changelog }}
+          tag_name: ${{ steps.changelog.outputs.tag }}
