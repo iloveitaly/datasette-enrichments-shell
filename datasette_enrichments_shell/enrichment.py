@@ -118,17 +118,17 @@ class ShellEnrichment(Enrichment):
                 table=table,
             ).encode("utf-8")
 
-            process = subprocess.Popen(
+            process = await asyncio.create_subprocess_shell(
                 command,
-                stdin=subprocess.PIPE,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-                shell=True,
+                stdin=asyncio.subprocess.PIPE,
+                stdout=asyncio.subprocess.PIPE,
+                stderr=asyncio.subprocess.PIPE,
+                # shell=True,
                 # TODO we should allow this to be customized
-                executable="/bin/zsh",
+                # executable="/bin/zsh",
             )
 
-            stdout, stderr = process.communicate(input=input_data)
+            stdout, stderr = await process.communicate(input=input_data)
             is_successful = process.returncode == 0
 
             if not is_successful:
@@ -163,8 +163,9 @@ class ShellEnrichment(Enrichment):
                 [output] + list(row[pk] for pk in pks),
             )
 
-        tasks = [asyncio.create_task(process_row(row)) for row in rows]
-        await asyncio.gather(*tasks)
+        async with asyncio.TaskGroup() as tg:
+            for row in rows:
+                tg.create_task(process_row(row))
 
     def _prepare_input(self, *, row, input_mode, single_column, database, table):
         if input_mode == "json":
