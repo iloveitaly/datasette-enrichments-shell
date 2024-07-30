@@ -1,3 +1,4 @@
+import asyncio
 import subprocess
 from datasette import hookimpl
 import sqlite_utils
@@ -24,6 +25,9 @@ class ShellEnrichment(Enrichment):
     slug = "shell"
     description = "Execute a shell command and send the output to a cell"
     log_traceback = True
+
+    # the batch size is run in parallel
+    batch_size = 10
 
     async def get_config_form(self, db: "Database", table: str):
         columns = await db.table_columns(table)
@@ -60,6 +64,17 @@ class ShellEnrichment(Enrichment):
 
         return ConfigForm
 
+    # async def initialize(self, datasette, db, table, config):
+    #     # Ensure column exists
+    #     output_column = config["output_column"]
+
+    #     def add_column_if_not_exists(conn):
+    #         db = sqlite_utils.Database(conn)
+    #         if output_column not in db[table].columns_dict:
+    #             db[table].add_column(output_column, str)
+
+    #     await db.execute_write_fn(add_column_if_not_exists)
+
     async def enrich_batch(
         self,
         datasette: "Datasette",
@@ -89,10 +104,11 @@ class ShellEnrichment(Enrichment):
         else:
             print("output column already exists")
 
-        for row in rows:
+        async def process_row(row):
             # let's check if there's already content in the output column
             if output_column in row and row[output_column]:
-                continue
+                print("output column already has content")
+                return
 
             input_data = self._prepare_input(
                 row=row,
@@ -127,13 +143,13 @@ class ShellEnrichment(Enrichment):
                     f"Command exited with error code {process.returncode}",
                 )
 
-                continue
+                return
 
             output = stdout.decode("utf-8")
 
             if not output:
                 print("output is empty")
-                continue
+                return
 
             print(f"Updating row {row[pks[0]]} with output {output}")
 
@@ -146,6 +162,9 @@ class ShellEnrichment(Enrichment):
                 # ids is an array of keys to properly handle compound pks
                 [output] + list(row[pk] for pk in pks),
             )
+
+        tasks = [asyncio.create_task(process_row(row)) for row in rows]
+        await asyncio.gather(*tasks)
 
     def _prepare_input(self, *, row, input_mode, single_column, database, table):
         if input_mode == "json":
