@@ -11,6 +11,8 @@ from datasette_enrichments_shell import ShellEnrichment
 
 
 def create_click_command(form_class):
+    "after a database and table are specified, this command dynamically creates a click command based on enrichment form for that pair"
+
     command_options = [
         click.argument("database-path", type=click.Path(exists=True)),
         click.argument("table-name", type=str, required=False),
@@ -22,15 +24,18 @@ def create_click_command(form_class):
         if not isinstance(field, UnboundField):
             continue
 
+        option_type = str
+
+        if field.field_class == SelectField:
+            option_type = click.Choice(
+                [c[0] for c in field.kwargs["choices"]], case_sensitive=False
+            )
+
+        field_name = f"--{field_name.replace('_', '-')}"
+
         option = click.option(
-            f"--{field_name.replace('_', '-')}",
-            type=(
-                click.Choice(
-                    [c[0] for c in field.kwargs["choices"]], case_sensitive=False
-                )
-                if isinstance(field.field_class, SelectField)
-                else str
-            ),
+            field_name,
+            type=option_type,
             required=any(
                 isinstance(v, DataRequired) for v in field.kwargs.get("validators", [])
             ),
