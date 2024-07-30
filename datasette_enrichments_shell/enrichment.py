@@ -62,11 +62,13 @@ class ShellEnrichment(Enrichment):
 
     async def enrich_batch(
         self,
+        datasette: "Datasette",
         db: "Database",
         table: str,
-        rows: list[dict],
-        pks: list[str],
+        rows: list,
+        pks: list,
         config: dict,
+        job_id: int,
     ):
         command = config["command"]
         single_column = config["single_column"]
@@ -84,6 +86,8 @@ class ShellEnrichment(Enrichment):
                     table=table, output_column=output_column
                 )
             )
+        else:
+            print("output column already exists")
 
         for row in rows:
             # let's check if there's already content in the output column
@@ -104,6 +108,7 @@ class ShellEnrichment(Enrichment):
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
                 shell=True,
+                # TODO we should allow this to be customized
                 executable="/bin/zsh",
             )
 
@@ -114,13 +119,13 @@ class ShellEnrichment(Enrichment):
                 # TODO better way to display errors?
                 print(stderr.decode("utf-8"))
 
-                # TODO this method sig doesn't like up with available arguments
-                # await self.log_error(
-                #     db,
-                #     table,
-                #     row,
-                #     f"Command exited with error code {process.returncode}",
-                # )
+                await self.log_error(
+                    db,
+                    job_id,
+                    # TODO this looks wrong :/ Maybe `pks_for_rows`?
+                    [row[pks[0]]],
+                    f"Command exited with error code {process.returncode}",
+                )
 
                 continue
 

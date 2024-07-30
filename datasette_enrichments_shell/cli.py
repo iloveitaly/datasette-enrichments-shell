@@ -50,11 +50,13 @@ def dynamic_command_func(**form_data):
     breakpoint()
 
 
-# TODO if --help is passed
+# TODO if --help is passed WITH table + database, we should show the help for dynamically created command
 @click.command()
 @click.argument("database-path", type=click.Path(exists=True))
 @click.argument("table-name", type=str, required=False)
 def cli(database_path, table_name, **kwargs):
+    "Run an enrichment over the command line"
+
     if not table_name:
         db = sqlite_utils.Database(database_path)
         tables = db.table_names()
@@ -75,7 +77,7 @@ def cli(database_path, table_name, **kwargs):
 
     dynamic_command = create_click_command(form)(dynamic_command_func)
 
-    # # Get current context
+    # Get current context
     ctx = click.get_current_context()
     prog_name = ctx.command_path
     args = ctx.args
