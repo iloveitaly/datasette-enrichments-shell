@@ -21,7 +21,7 @@ CI = "https://github.com/iloveitaly/datasette-enrichments-shell/actions"
 
 [tool.poetry.dependencies]
 python = "^3.9"
-datasette = "^0.64.6"
+datasette = ">=0.64.6,<0.66.0"
 datasette-enrichments = ">=0.2,<0.5"
 sqlite-utils = "^3.36"
 
