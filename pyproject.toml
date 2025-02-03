@@ -26,7 +26,7 @@ datasette-enrichments = ">=0.2,<0.6"
 sqlite-utils = "^3.36"
 
 [tool.poetry.group.dev.dependencies]
-black = "^24.2.0"
+black = ">=24.2,<26.0"
 isort = ">=5.13.2,<7.0.0"
 pyright = "^1.1.351"
 
