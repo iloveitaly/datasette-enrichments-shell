@@ -334,14 +334,14 @@ test = ["beautifulsoup4 (>=4.8.1)", "black (==24.4.2)", "blacken-docs (==1.12.1)
 
 [[package]]
 name = "datasette-enrichments"
-version = "0.5"
+version = "0.5.1"
 description = "Tools for running enrichments against data stored in Datasette"
 optional = false
 python-versions = ">=3.7"
 groups = ["main"]
 files = [
-    {file = "datasette_enrichments-0.5-py3-none-any.whl", hash = "sha256:1711aa863764f40d757f5664254319367816ed6068f44193510f45de586ef65e"},
-    {file = "datasette_enrichments-0.5.tar.gz", hash = "sha256:4781e020cd66efc2323eb0906cc6a9f662f76b20667c7990e1535b96d49cbf25"},
+    {file = "datasette_enrichments-0.5.1-py3-none-any.whl", hash = "sha256:711ab68cc7eeaf32f7b0934d0cb74c1278fab01626e7289dc0f3df20c1be9b4a"},
+    {file = "datasette_enrichments-0.5.1.tar.gz", hash = "sha256:e3c578a924b7cd9b9e099bef47d4d636df377a58449068741be50ddf365754a1"},
 ]
 
 [package.dependencies]
