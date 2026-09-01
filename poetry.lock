@@ -300,14 +300,14 @@ test-randomorder = ["pytest-randomly"]
 
 [[package]]
 name = "datasette"
-version = "0.65.2"
+version = "0.65.3"
 description = "An open source multi-tool for exploring and publishing data"
 optional = false
 python-versions = ">=3.9"
 groups = ["main"]
 files = [
-    {file = "datasette-0.65.2-py3-none-any.whl", hash = "sha256:d4f342a5c86d073bbb1880a9df792354cae4f951e427b57586713eff1896507f"},
-    {file = "datasette-0.65.2.tar.gz", hash = "sha256:be956fb2633b8380d7f818b5ddab40d5c7346d5e9d4d24e81c43b1fb60267432"},
+    {file = "datasette-0.65.3-py3-none-any.whl", hash = "sha256:30ea57f672f8c8ee40fc212fd63d1bdc6bb94e5afd733732b19f0c84371483da"},
+    {file = "datasette-0.65.3.tar.gz", hash = "sha256:ad283ea3c7f80423cb8ea5741fb9072878b40aedae3e3b63ab9856d92191582d"},
 ]
 
 [package.dependencies]
